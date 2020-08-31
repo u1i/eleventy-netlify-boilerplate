@@ -17,4 +17,4 @@ For more info on installation and usage, view the \[project repo]({{ pkg.reposit
 
 Or click the button below to deploy your own copy of this project to Netlify
 
-[Yoisho](https://github.com/u1i/yoisho)
+Yoisho
