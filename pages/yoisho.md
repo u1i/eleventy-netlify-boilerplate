@@ -6,27 +6,62 @@ eleventyNavigation:
   key: Yoisho
   order: 1
 ---
-Leverage agile frameworks to provide a robust synopsis for high level overviews. Iterative approaches to corporate strategy foster collaborative thinking to further the overall value proposition. Organically grow the holistic world view of disruptive innovation via workplace diversity and empowerment.
+# Account Info & Balance - REST/JSON OAuth
 
-Add a few line breaks in here to test:-
-Capitalize  
-on  
-low  
-hanging  
-fruit  
+Gives you an account balance API with a 3-legged OAuth flow including consumer consent management & login.
 
-## Our services
+##### 3-legged OAuth components
 
-Bring to the table win-win survival strategies to ensure proactive domination. At the end of the day, going forward, a new normal that has evolved from generation X is on the runway heading towards a streamlined cloud solution. User generated content in real-time will have multiple touchpoints for offshoring. Organically grow the holistic world view of disruptive innovation via workplace diversity and empowerment.
+1. Consumer: the app, identified by client\_id and client\_secret
+2. Resource Owner: the banking customer, here it's Dave and Jane
+3. API: the account balance service
 
-### Blue-sky thinking
+![](https://raw.githubusercontent.com/u1i/yoisho/master/resources/account-2.png)
 
-Capitalize on low hanging fruit to identify a ballpark value added activity to beta test. Override the digital divide with additional clickthroughs from DevOps. Nanotechnology immersion along the information highway will close the loop on focusing solely on the bottom line. Organically grow the holistic world view of disruptive innovation via workplace diversity and empowerment.
+### Credentials:
 
-#### Management frameworks
+* client_id: 7b6fc8ed5127b0b2f076d
+* client_secret: 724e6890757b0ae624684b70e111b705fe6b050c
+* user accounts: jane, dave (use any random password)
 
-Podcasting operational change management inside of workflows to establish a framework. Taking seamless key performance indicators offline to maximise the long tail. Keeping your eye on the ball while performing a deep dive on the start-up mentality to derive convergence on cross-platform integration. Organically grow the holistic world view of disruptive innovation via workplace diversity and empowerment.
+### Start the flow
 
-##### Regulatory convergence
+Access this URL in the browser (replace the redirect_uri with your own):
 
-Collaboratively administrate empowered markets via plug-and-play networks. Dynamically procrastinate B2C users after installed base benefits. Dramatically visualize customer directed convergence without revolutionary ROI. Organically grow the holistic world view of disruptive innovation via workplace diversity and empowerment.
+`https://backend.yoisho.dob.jp/account/authorize?redirect_uri=http://www3.sotong.io&client_id=7b6fc8ed5127b0b2f076d`
+
+Login with either 'dave' or 'jane' (any random password).
+
+> ?code=4990047
+
+### Get the access_token - valid for 60 seconds
+
+Use the code from the previous step to exchange it for an access token. Of course, you'd typically do that server side.
+
+`curl https://backend.yoisho.dob.jp/account/access_token?code=4990047&client_id=7b6fc8ed5127b0b2f076d&client_secret=724e6890757b0ae624684b70e111b705fe6b050c`
+
+> {"token_type": "bearer", "scope": "read", "access_token": "eSlcNwnLxTuzsYXyzFrhGGU3mrCKPxQ5fy51Jx93.MTUzMjM1NDM0OA=="}
+>
+
+### Get account info for user
+
+Now with this access token we can call the actual API and retrieve the account info from the resource owner, which is the banking client.
+
+`curl -X GET https://backend.yoisho.dob.jp/account/info -H 'Authorization: Bearer eSlcNwnLxTuzsYXyzFrhGGU3mrCKPxQ5fy51Jx93.MTUzMjM1NDM0OA=='`
+
+> {"account_owner": "dave", "fullname": "Dave Thompson", "email": "daveth271@gmail.com", "address": "491-1295, Nishimiyanosawa 6-jo, Teine-ku Sapporo-shi, Hokkaido", "phone": "+8183-977-7817"}
+> 
+
+
+### Get account balance for user
+
+With the same access token we retrieve the account balance from the resource owner, which is the banking client.
+
+`curl -X GET https://backend.yoisho.dob.jp/account/balance -H 'Authorization: Bearer eSlcNwnLxTuzsYXyzFrhGGU3mrCKPxQ5fy51Jx93.MTUzMjM1NDM0OA=='`
+
+> {"account_owner": "dave", "account_balance": "10,187.91"}
+> 
+
+### OAuth client - Python implementation
+
+Here's a simple web based client implementation that shows the entire flow in the browser - the banking customer logs in and authorizes the app to access the account balance on their behalf: [Yoisho OAuth Client (Python)](https://github.com/u1i/yoisho/tree/master/yoisho-account-oauth-client)
